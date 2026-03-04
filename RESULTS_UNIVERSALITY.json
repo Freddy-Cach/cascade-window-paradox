@@ -1,0 +1,14 @@
+[
+  {
+    "name": "BA(m=2)",
+    "N": 1000,
+    "mean_k": 3.99,
+    "kappa_before": 10.83,
+    "kappa_after": 2.43,
+    "pc_before": 0.332,
+    "pc_after": 0.908,
+    "delta_f_p_pct": 173.3,
+    "cascade_before": 0.51,
+    "cascade_after": 32.9,
+    "delta_f_c_pct": 6414.9,
+    "compounding": 

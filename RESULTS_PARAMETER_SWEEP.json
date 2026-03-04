@@ -1,0 +1,146 @@
+{
+  "m1_a5": {
+    "m": 1,
+    "alpha": 5,
+    "kappa": 7.7,
+    "dF_p_mean": 23.4,
+    "dF_c_mean": 0.1,
+    "dF_c_positive": 5,
+    "n": 10
+  },
+  "m1_a10": {
+    "m": 1,
+    "alpha": 10,
+    "kappa": 7.0,
+    "dF_p_mean": 20.9,
+    "dF_c_mean": -0.3,
+    "dF_c_positive": 2,
+    "n": 10
+  },
+  "m1_a15": {
+    "m": 1,
+    "alpha": 15,
+    "kappa": 7.2,
+    "dF_p_mean": 22.4,
+    "dF_c_mean": -0.4,
+    "dF_c_positive": 1,
+    "n": 10
+  },
+  "m1_a20": {
+    "m": 1,
+    "alpha": 20,
+    "kappa": 7.7,
+    "dF_p_mean": 23.7,
+    "dF_c_mean": -0.4,
+    "dF_c_positive": 0,
+    "n": 10
+  },
+  "m2_a5": {
+    "m": 2,
+    "alpha": 5,
+    "kappa": 11.8,
+    "dF_p_mean": 92.8,
+    "dF_c_mean": 61.6,
+    "dF_c_positive": 10,
+    "n": 10
+  },
+  "m2_a10": {
+    "m": 2,
+    "alpha": 10,
+    "kappa": 10.6,
+    "dF_p_mean": 164.4,
+    "dF_c_mean": 41.4,
+    "dF_c_positive": 10,
+    "n": 10
+  },
+  "m2_a15": {
+    "m": 2,
+    "alpha": 15,
+    "kappa": 10.6,
+    "dF_p_mean": 201.0,
+    "dF_c_mean": 10.6,
+    "dF_c_positive": 8,
+    "n": 10
+  },
+  "m2_a20": {
+    "m": 2,
+    "alpha": 20,
+    "kappa": 10.9,
+    "dF_p_mean": 193.8,
+    "dF_c_mean": 0.2,
+    "dF_c_positive": 4,
+    "n": 10
+  },
+  "m3_a5": {
+    "m": 3,
+    "alpha": 5,
+    "kappa": 14.2,
+    "dF_p_mean": 76.5,
+    "dF_c_mean": 101.5,
+    "dF_c_positive": 10,
+    "n": 10
+  },
+  "m3_a10": {
+    "m": 3,
+    "alpha": 10,
+    "kappa": 13.9,
+    "dF_p_mean": 133.7,
+    "dF_c_mean": 130.6,
+    "dF_c_positive": 9,
+    "n": 10
+  },
+  "m3_a15": {
+    "m": 3,
+    "alpha": 15,
+    "kappa": 14.3,
+    "dF_p_mean": 198.3,
+    "dF_c_mean": 178.2,
+    "dF_c_positive": 10,
+    "n": 10
+  },
+  "m3_a20": {
+    "m": 3,
+    "alpha": 20,
+    "kappa": 14.3,
+    "dF_p_mean": 292.7,
+    "dF_c_mean": 100.4,
+    "dF_c_positive": 10,
+    "n": 10
+  },
+  "m4_a5": {
+    "m": 4,
+    "alpha": 5,
+    "kappa": 17.6,
+    "dF_p_mean": 66.9,
+    "dF_c_mean": 17.8,
+    "dF_c_positive": 7,
+    "n": 10
+  },
+  "m4_a10": {
+    "m": 4,
+    "alpha": 10,
+    "kappa": 17.2,
+    "dF_p_mean": 115.8,
+    "dF_c_mean": 189.4,
+    "dF_c_positive": 10,
+    "n": 10
+  },
+  "m4_a15": {
+    "m": 4,
+    "alpha": 15,
+    "kappa": 17.1,
+    "dF_p_mean": 174.4,
+    "dF_c_mean": 266.6,
+    "dF_c_positive": 10,
+    "n": 10
+  },
+  "m4_a20": {
+    "m": 4,
+    "alpha": 20,
+    "kappa": 17.8,
+    "dF_p_mean": 251.2,
+    "dF_c_mean": 259.6,
+    "dF_c_positive": 10,
+    "n": 10
+  }
+}
