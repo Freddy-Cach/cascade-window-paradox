@@ -147,4 +147,4 @@ MIT License. All code and data freely available for reproduction and extension.
 
 ## Contact
 
-Federico Cachero — [email upon publication]
+Federico Cachero — federicohernancachero@gmail.com
