@@ -139,7 +139,7 @@ The paper's core claims are:
 ## Lean4 Verification
 
 Four core mathematical claims are formally verified in Lean4:
-- See `~/lean-verify/TierSVerify/P2Complete.lean`
+- See `proofs/P2Complete.lean`
 
 ## License
 
