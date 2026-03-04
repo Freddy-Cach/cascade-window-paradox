@@ -1,0 +1,22 @@
+cff-version: 1.2.0
+message: "If you use this software, please cite it using the metadata in this file."
+title: "Cascade Window Paradox: hub removal expands the cascade window while degrading percolation robustness"
+type: software
+authors:
+  - family-names: Cachero
+    given-names: Federico
+    email: federicohernancachero@gmail.com
+repository-code: "https://github.com/Freddy-Cach/cascade-window-paradox"
+license: MIT
+version: "0.1.0"
+date-released: "2026-03-04"
+preferred-citation:
+  type: article
+  title: "Compounding Vulnerability: Hub Removal Triggers Cascade Phase Transitions While Degrading Percolation Robustness in Scale-Free Networks"
+  authors:
+    - family-names: Cachero
+      given-names: Federico
+  year: 2026
+  # Fill after arXiv submission
+  # journal: "arXiv"
+  # url: "https://arxiv.org/abs/XXXX.XXXXX"

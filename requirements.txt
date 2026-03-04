@@ -1,0 +1,6 @@
+# Minimal Python deps to reproduce the simulations/figures in this repo
+# (pinning optional; keep loose unless you want deterministic builds)
+numpy>=1.24
+scipy>=1.10
+networkx>=3.0
+matplotlib>=3.7
