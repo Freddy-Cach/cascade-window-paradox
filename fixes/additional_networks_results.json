@@ -1,0 +1,81 @@
+{
+  "networks": {
+    "email-enron": {
+      "N": 33696,
+      "M": 180811,
+      "k_mean": 10.7,
+      "kappa": 142.4,
+      "clustering": 0.497,
+      "pc_suscept_pre": 0.02,
+      "pc_suscept_post": 0.021,
+      "delta_F_suscept_pct": -6.8,
+      "max_cascade_amp_pct": 2082,
+      "max_amp_phi": 0.1,
+      "compounding_confirmed": false,
+      "cascade_confirmed": true,
+      "note": "High clustering (C=0.497) may affect susceptibility peak reliability. S=0.5 shows percolation degradation."
+    },
+    "ca-hepph": {
+      "N": 11204,
+      "M": 117619,
+      "k_mean": 21.0,
+      "kappa": 130.9,
+      "clustering": 0.622,
+      "pc_suscept_pre": 0.505,
+      "pc_suscept_post": 0.099,
+      "delta_F_suscept_pct": -80.4,
+      "pc_S05_pre": 0.165,
+      "pc_S05_post": 0.26,
+      "delta_F_S05_pct": 58.1,
+      "max_cascade_amp_pct": 7340,
+      "max_amp_phi": 0.24,
+      "compounding_confirmed": false,
+      "cascade_confirmed": true,
+      "note": "Susceptibility peak unreliable (C=0.622). S=0.5 confirms +58% percolation degradation."
+    },
+    "p2p-gnutella": {
+      "N": 6299,
+      "M": 20776,
+      "k_mean": 6.6,
+      "kappa": 17.7,
+      "clustering": 0.011,
+      "pc_suscept_pre": 0.119,
+      "pc_suscept_post": 0.208,
+      "delta_F_suscept_pct": 74.9,
+      "pc_S05_pre": 0.21,
+      "pc_S05_post": 0.372,
+      "delta_F_S05_pct": 77.0,
+      "max_cascade_amp_pct": 16857,
+      "max_amp_phi": 0.16,
+      "compounding_confirmed": true,
+      "cascade_confirmed": true,
+      "note": "Both methods agree. Clean confirmation. Low clustering (C=0.011) similar to BA."
+    },
+    "wiki-vote": {
+      "N": 7066,
+      "M": 100736,
+      "k_mean": 28.5,
+      "kappa": 145.4,
+      "clustering": 0.142,
+      "pc_suscept_pre": 0.01,
+      "pc_suscept_post": 0.069,
+      "delta_F_suscept_pct": 593.9,
+      "pc_S05_pre": 0.105,
+      "pc_S05_post": 0.349,
+      "delta_F_S05_pct": 233.5,
+      "max_cascade_amp_pct": 60272,
+      "max_amp_phi": 0.1,
+      "compounding_confirmed": true,
+      "cascade_confirmed": true,
+      "note": "Both methods agree. Extreme amplification at very high kappa."
+    }
+  },
+  "summary": {
+    "cascade_universal": true,
+    "compounding_confirmed_count": 2,
+    "total_networks": 4,
+    "strongest_cascade": "wiki-vote (+60,272%)",
+    "strongest_percolation": "wiki-vote (+594%)",
+    "note": "Cascade amplification confirmed in ALL 4 networks. Compounding vulnerability confirmed in low-clustering networks (p2p-Gnutella, Wiki-Vote). High-clustering networks (Email-Enron, CA-HepPh) show cascade amplification but percolation method-dependent."
+  }
+}

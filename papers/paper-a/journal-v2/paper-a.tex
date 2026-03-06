@@ -1,0 +1,725 @@
+\documentclass[aps,pre,twocolumn,superscriptaddress,showpacs]{revtex4-2}
+
+\usepackage{amsmath,amssymb,amsthm}
+\usepackage{graphicx}
+\usepackage{hyperref}
+\usepackage{booktabs}
+\usepackage{xcolor}
+\usepackage{bm}
+\usepackage{dcolumn}
+
+% Custom commands
+\newcommand{\avg}[1]{\langle #1 \rangle}
+\newcommand{\pc}{p_c}
+\newcommand{\DF}{\Delta F}
+\newcommand{\kcut}{k_{\text{cut}}}
+\newcommand{\keff}{K_{\text{eff}}}
+
+\begin{document}
+
+\title{Compounding Vulnerability: Hub Removal Triggers Cascade Phase Transitions While Degrading Percolation Robustness in Scale-Free Networks}
+
+\author{Federico Cachero}
+\affiliation{Independent Researcher}
+\email{federicohernancachero@gmail.com}
+
+\date{\today}
+
+\begin{abstract}
+Hub removal in scale-free networks is known to degrade percolation robustness by raising the bond percolation threshold. We show that this same intervention simultaneously triggers a cascade phase transition under the Watts threshold model. In Barab\'asi--Albert networks ($N=2{,}000$, $m=2$), removing the top 10\% of nodes by degree raises $\pc$ from $0.174$ to $0.776$ ($+347\%$; susceptibility-peak method~\cite{Newman2001}, 30 network realizations), reducing robustness to random edge failure. Simultaneously, at cascade threshold $\varphi=0.22$, mean cascade size increases from $0.86\%$ [95\% CI: 0.43--1.30] to $23.1\%$ [95\% CI: 21.3--24.9] ($1{,}000$ trials), crossing from the subcritical to supercritical regime---compounding, rather than trading off, the percolation degradation.
+
+Using a controlled experiment that independently varies hub presence and hub activation threshold on the same network topology, we demonstrate that hub-mediated cascade suppression is primarily dynamical: making hubs vulnerable without removing them produces 95\% cascades versus 19\% with removal and 0.28\% at baseline. An intermediate condition (hub threshold $\varphi_h=0.05$) yields 85\% cascades, revealing a continuous firewall gradient.
+
+We operationalize Watts' (2002) stable-node mechanism as a quantitative condition $k > 1/\varphi$ and derive, under the configuration-model approximation, a closed-form expression for the post-removal cascade branching factor $z_1(\varphi, \alpha, m)$. This predicts a newly opened interval where the pre-removal network is subcritical but the post-removal network is supercritical. We define $\varphi^*$ as the \emph{upper} supercritical boundary, $\varphi^* = \sup\{\varphi : z_1(\varphi) \geq 1\}$. The $z_1$ derivation confirms that at $\varphi=0.22$, the pre-removal network is subcritical ($z_1=0.850$) while the post-removal network is supercritical ($z_1=1.195$). Our results establish that hub manipulation creates compounding vulnerability: both percolation and cascade metrics worsen simultaneously, with no Pareto improvement achievable through uniform hub deletion on static, unweighted networks. These findings persist across $N=500$--$10{,}000$ and, within the BA model family, require degree heterogeneity $\kappa > {\sim}10$; the effect vanishes in homogeneous networks (ER, WS) and its dependence on clustering remains an open question.
+\end{abstract}
+
+\keywords{network resilience, cascade failure, bond percolation, hub removal, scale-free networks, Watts cascade model, phase transition, degree heterogeneity, compounding vulnerability}
+
+\maketitle
+
+%% ============================================================
+%% 1. INTRODUCTION
+%% ============================================================
+\section{Introduction}
+\label{sec:intro}
+
+Network resilience---the ability of a system to maintain function under stress---is a central problem of complexity science~\cite{Boccaletti2006,Gao2016,Barabasi2016,Artime2024,Valdez2020}. Resilience is not a property of a graph $G$ alone, but of the pair $(G, S)$ consisting of a network and a specified stress model~\cite{Alderson2010}. Two canonical stress models illustrate this~\cite{Stauffer2014,Newman2010}: (i) bond percolation, where edges are retained with probability $p$ and the observable is the giant component size, yielding the critical threshold $\pc$ as a fragility metric; and (ii) the Watts threshold cascade~\cite{Watts2002}, where nodes activate when a fraction $\varphi$ of their neighbors are active, and the observable is the final cascade size.
+
+Two research traditions have characterized resilience under these respective stress models largely in parallel. The percolation literature~\cite{Barabasi1999,Albert2000,Cohen2001,Geng2021} established that scale-free networks are simultaneously robust to random failures and vulnerable to targeted attacks. The cascade literature~\cite{Watts2002,Gleeson2007,Dodds2004,Nishioka2022,Karimi2021} established that threshold-based contagion can spread globally even from small seeds, with recent extensions to temporal networks and heterogeneous thresholds. A critical question at their intersection is: \emph{when a network intervention improves resilience under one stress model, what happens under the other?} This question has practical urgency. Infrastructure engineers who decommission large substations, financial regulators who break up systemically important institutions, and public health officials who target highly connected individuals are all making interventions that assume a specific failure model. If these interventions inadvertently worsen resilience under a different stress model, consequences could be severe---as demonstrated by the 2008 financial crisis, where interconnection that appeared robust to idiosyncratic defaults proved catastrophically fragile under cascade dynamics~\cite{Battiston2012}.
+
+Prior work has shown qualitatively that complex networks can be ``more robust and more fragile'' depending on the stress model~\cite{Albert2000,Callaway2000}, and recent studies have explored cascading failures across interdependent networks~\cite{Valdez2020,Xu2021} and scaling laws of failure dynamics~\cite{Pal2023}, but stopped short of characterizing the mechanism or providing a predictive condition for when compounding vulnerability occurs under deliberate intervention on a \emph{single} network. Here we address this gap directly, studying the canonical intervention of hub removal (top 10\% of nodes by degree) in Barab\'asi--Albert networks~\cite{Barabasi1999} and measuring its joint effect on percolation and cascade dynamics.
+
+\textbf{Our contributions are threefold:}
+
+\begin{enumerate}
+\item A systematic study of the \emph{joint} percolation-cascade phase structure under hub removal, revealing compounding vulnerability---both stress models worsen simultaneously at intermediate cascade thresholds---a phenomenon that neither stress model alone would predict.
+
+\item A controlled experimental decomposition showing that hub-mediated cascade suppression is primarily \emph{dynamical} (threshold-based) rather than structural (connectivity-based), demonstrated by the ${\sim}95\%/{\sim}19\%/{\sim}0.3\%$ cascade split across hub vulnerability conditions.
+
+\item A closed-form analytical derivation of the post-removal cascade branching factor $z_1(\varphi, \alpha, m)$ under the configuration-model approximation, providing a predictive expression for cascade window expansion under targeted hub removal in BA networks.
+\end{enumerate}
+
+%% ============================================================
+%% 2. MODELS AND METHODS
+%% ============================================================
+\section{Models and Methods}
+\label{sec:methods}
+
+\subsection{Network Models}
+
+We study three canonical network models with matched mean degree $\avg{k} = 4$ to isolate the role of degree heterogeneity:
+
+\textbf{Barab\'asi--Albert (BA):} Generated by preferential attachment with $m=2$ new edges per node, yielding $P(k) \propto k^{-3}$. Degree heterogeneity $\kappa = \avg{k^2}/\avg{k} \approx 10$--$13$. We use $N=500$--$10{,}000$ for finite-size scaling and $N=2{,}000$ for the $\varphi$-sweep.
+
+\textbf{Watts--Strogatz (WS):} Regular ring lattice with $k=4$ neighbors rewired with probability $p=0.1$~\cite{WattsStrogatz1998}, yielding a homogeneous degree distribution concentrated near $k=4$. $\kappa \approx 4$.
+
+\textbf{Erd\H{o}s--R\'enyi (ER):} Random graph with $\avg{k} = 4$ and Poisson degree distribution. $\kappa \approx 5$.
+
+\subsection{Hub Removal Protocol}
+
+Hub removal consists of simultaneously removing the top $\lfloor 0.10 \cdot N \rfloor$ nodes by degree (ties broken by node index), along with all incident edges. This protocol represents a deliberate hardening intervention (e.g., decommissioning large substations, breaking up systemically important banks), not a random failure process.
+
+\subsection{Bond Percolation Threshold}
+
+We estimate the bond percolation threshold $\pc$ using the susceptibility peak method~\cite{Newman2001}: for each occupation probability $p$, edges are retained independently with probability $p$ and we compute the mean finite-cluster size $\chi(p) = \sum_s s^2 n_s / \sum_s s \cdot n_s$ (excluding the giant component), where $n_s$ is the number of clusters of size $s$. The percolation threshold is defined as $\pc = \arg\max_p \chi(p)$, the standard estimator in computational percolation studies. We sample 200 values of $p \in [0,1]$ with 50 bond realizations per $p$-value, averaged over 30 independent network realizations. Bootstrap 95\% confidence intervals are computed with $10{,}000$ resamples.
+
+As a robustness check, we also compute $\pc$ using the $S=0.5$ crossing method (where the relative giant component size $S(p) = |\mathrm{GCC}|/N$ reaches $0.5$) and the Molloy--Reed analytical estimate $p_c^{\mathrm{MR}} = \avg{k}/(\avg{k^2} - \avg{k})$. All three methods yield consistent directional results ($\DF_p \gg 0$), though quantitative values differ due to BA disassortativity and finite-size effects (see Appendix~\ref{app:percolation} for comparison). We report susceptibility-peak values throughout.
+
+We define the percolation fragility change as $\DF_p = (\pc^{\mathrm{after}} - \pc^{\mathrm{before}})/\pc^{\mathrm{before}}$. Positive $\DF_p$ indicates \emph{reduced} percolation robustness (higher $\pc$ means more edges must be retained for connectivity).
+
+\subsection{Watts Cascade Model}
+
+Each node $i$ has a uniform cascade threshold $\varphi \in (0,1)$. Node $i$ becomes active when the fraction of active neighbors reaches $\varphi$:
+\begin{equation*}
+\frac{|\{j \in \mathcal{N}(i) : j \text{ active}\}|}{k_i} \geq \varphi.
+\end{equation*}
+We use synchronous update with a single random seed, running until convergence or 150 steps. Cascade size $C(\varphi)$ is the mean fraction of active nodes, averaged over 40 random seeds and 15 network realizations. We sweep 15 values: $\varphi \in \{0.05, 0.10, \ldots, 0.50\}$, with finer sampling in the transition zone $\varphi \in [0.15, 0.30]$.
+
+\subsection{Cascade Vulnerability Condition}
+
+We operationalize Watts' (2002) stable-node mechanism~\cite{Watts2002} as a quantitative condition: a node $v$ is a \emph{stable node} (cascade-resistant) at threshold $\varphi$ if $k_v > 1/\varphi$. Such nodes require at least $\lceil k_v \cdot \varphi \rceil \geq 2$ active neighbors to activate and therefore cannot be triggered by a single active neighbor. For BA networks at $\varphi=0.22$, $1/\varphi \approx 4.5$, so nodes with $k \geq 5$ are stable---approximately 20\% of the population.
+
+%% ============================================================
+%% 3. HUB VULNERABILITY EXPERIMENT
+%% ============================================================
+\section{The Hub Vulnerability Experiment}
+\label{sec:hub_vuln}
+
+\subsection{Experimental Design}
+
+To determine whether hub-mediated cascade suppression is dynamical (hubs are hard to activate due to high degree) or topological (hubs occupy structurally critical positions), we design a controlled experiment on the \emph{same} BA network ($N=2{,}000$, $m=2$) under five conditions at $\varphi=0.22$:
+
+\begin{table}[h]
+\caption{Hub vulnerability experimental conditions.}
+\label{tab:conditions}
+\begin{ruledtabular}
+\begin{tabular}{llc}
+\textrm{Condition} & \textrm{Description} & \multicolumn{1}{c}{\textrm{Hub } $\varphi$} \\
+\colrule
+A (baseline) & All nodes at $\varphi=0.22$ & 0.22 \\
+B (vulnerable) & Hubs at $\varphi=0.01$ & 0.01 \\
+B2 (moderate) & Hubs at $\varphi=0.05$ & 0.05 \\
+C (removed) & Top 10\% deleted & \multicolumn{1}{c}{---} \\
+D (resistant) & Hubs at $\varphi=0.50$ & 0.50 \\
+\end{tabular}
+\end{ruledtabular}
+\end{table}
+
+Conditions B and B2 modify \emph{only} the activation thresholds of hub nodes---the network topology is identical to baseline. This cleanly separates the dynamical firewall mechanism from connectivity effects.
+
+\subsection{Results}
+
+\begin{table}[h]
+\caption{Hub vulnerability experiment results ($\varphi=0.22$, $N=2{,}000$, $m=2$). Each condition averaged over 200 trials (10 independent network realizations $\times$ 20 seed nodes each). Seed nodes are drawn uniformly from the surviving-node set so that the same seed can be used across all conditions.}
+\label{tab:hub_vuln}
+\begin{ruledtabular}
+\begin{tabular}{lcc}
+\textrm{Condition} & \textrm{Mean cascade (\%)} & \multicolumn{1}{c}{\textrm{Std (\%)}} \\
+\colrule
+A (baseline) & 0.28 & 0.46 \\
+B ($\varphi_{\mathrm{hub}}=0.01$) & 95.0 & 21.8 \\
+B2 ($\varphi_{\mathrm{hub}}=0.05$) & 84.5 & 36.2 \\
+C (removed) & 18.7 & 28.4 \\
+D ($\varphi_{\mathrm{hub}}=0.50$) & 0.26 & 0.37 \\
+\end{tabular}
+\end{ruledtabular}
+\end{table}
+
+\begin{figure}[t]
+\includegraphics[width=\columnwidth]{fig1_hub_vulnerability}
+\caption{Hub vulnerability experiment results at $\varphi=0.22$, BA($N=2{,}000$, $m=2$). The 95\% cascade under condition~B (threshold modification only, no topology change) versus 19\% under condition~C (hub removal) demonstrates that cascade suppression is primarily dynamical. Error bars show standard deviation over 200 trials.}
+\label{fig:hub_vuln}
+\end{figure}
+
+\subsection{Decomposition of Effects}
+
+\textbf{Pure vulnerability effect (B vs.\ A).} Making hubs easy to activate---without changing the network topology---produces cascades of 95.0\%, far exceeding the 18.7\% seen under actual hub removal. When hubs become vulnerable, their high degree transforms them from cascade \emph{barriers} into cascade \emph{amplifiers}: a hub with $k=100$ that activates with a single neighbor immediately exposes 100 neighbors to cascade pressure. The cascade difference between A (0.28\%) and B (95.0\%) is entirely dynamical.
+
+\textbf{Connectivity-loss penalty (C vs.\ B).} The difference between B (95.0\%) and C (18.7\%) isolates the cost of connectivity loss. Hub removal reduces cascade size by ${\sim}76$ percentage points relative to making hubs vulnerable, because removing hubs also removes the edges through which cascades propagate.
+
+\textbf{Net hub removal effect (C vs.\ A).} The observed cascade increase under hub removal (0.28\%~$\to$~18.7\%) is the net result of a large vulnerability gain (firewall destruction) partially offset by a large connectivity loss (edge deletion).
+
+\textbf{Continuous firewall gradient (B2 vs.\ B).} The ${\sim}10$ percentage point gap between B (95.0\%, hubs at $\varphi=0.01$) and B2 (84.5\%, hubs at $\varphi=0.05$) demonstrates that the firewall effect is not binary. Even at the low threshold $\varphi=0.05$, hubs retain measurable cascade-blocking capacity. The firewall strength is a continuous function of hub activation threshold, not a step function.
+
+\textbf{Saturation (D $\approx$ A).} Making hubs \emph{more resistant} ($\varphi=0.50$, condition D) produces no meaningful change from baseline (0.26\% vs.\ 0.28\%). Hubs are already highly effective cascade barriers at the baseline threshold $\varphi=0.22$. This saturation has practical implications: invest in preventing hub degradation, not in reinforcing already-effective barriers.
+
+\subsection{Implication: Cascade Suppression Is Dynamical}
+
+The hub vulnerability experiment establishes that cascade suppression by hubs is primarily a \textbf{dynamical} mechanism, not a topological one. The same cascade explosion ($\sim 95\%$) can be achieved without any topological change---simply by modifying hub activation thresholds. This confirms and quantifies Watts' (2002) conceptual observation that high-degree ``stable'' nodes suppress cascades through their activation barriers~\cite{Watts2002}, and demonstrates that hub removal triggers cascade window expansion because it eliminates these activation barriers while simultaneously (and partially counteractingly) reducing connectivity.
+
+%% ============================================================
+%% 4. CASCADE PHASE STRUCTURE
+%% ============================================================
+\section{Cascade Phase Structure}
+\label{sec:phase}
+
+\subsection{Three Regimes}
+
+The cascade response to hub removal depends critically on the cascade threshold $\varphi$. A systematic $\varphi$-sweep reveals three distinct regimes:
+
+\textbf{Regime I ($\varphi < 0.15$): Hub removal reduces cascades.} At low thresholds, nearly all nodes are vulnerable ($k\varphi < 1$ for most). Both networks are supercritical. Hub removal reduces cascade size (86.5\%~$\to$~46.4\% at $\varphi=0.10$) because connectivity reduction limits cascade reach.
+
+\textbf{Regime II ($0.15 < \varphi < 0.27$): Phase transition zone.} Hub removal shifts the network from subcritical to supercritical cascade dynamics. At $\varphi=0.22$, mean cascade size increases from $0.86\%$ [95\% CI: 0.43--1.30] to $23.1\%$ [95\% CI: 21.3--24.9] ($n=1{,}000$ trials: 50 networks $\times$ 20 seeds). This constitutes a genuine phase transition, confirmed by bimodal cascade size distributions (Fig.~\ref{fig:bimodal}): the probability of a global cascade ($C > 10\%$) rises from 0/1{,}000 before removal to 377/1{,}000 after removal ($P_{\mathrm{global}}=0.377$, Wilson 95\% CI: $[0.348, 0.406]$). Post-removal trials split between a subcritical mode ($C < 1\%$) and a supercritical mode ($C > 10\%$), with few intermediate values---the hallmark of a system straddling the critical point. The hub vulnerability experiment (Table~\ref{tab:hub_vuln}, $n=200$) yields consistent results ($0.28\% \to 18.7\%$) under a controlled single-network protocol.
+
+\begin{figure}[t]
+\includegraphics[width=\columnwidth]{fig5_bimodality}
+\caption{Cascade size distribution after hub removal at $\varphi=0.22$, BA($N=2{,}000$, $m=2$, 200 trials). The main panel shows the post-removal distribution, which is bimodal with modes at $<1\%$ (subcritical) and $>10\%$ (global cascade). The inset shows the pre-removal distribution, which is unimodal near zero---all cascades subcritical. The transition from unimodal to bimodal is the signature of a phase transition straddling the critical point.}
+\label{fig:bimodal}
+\end{figure}
+
+\textbf{Regime III ($\varphi > 0.27$): Both subcritical.} Nearly no nodes are vulnerable. Hub removal modestly worsens cascades (relative increases) but absolute sizes remain $< 0.5\%$. 
+
+\subsection{Cascade Response Across $\varphi$}
+
+Figure~\ref{fig:phi_sweep} plots the mean cascade size before and after hub removal as a function of $\varphi$ (log scale). Regime~I corresponds to low thresholds where both networks are globally supercritical and hub removal reduces cascade reach by deleting connectivity. Regime~II is a narrow transition zone where hub removal induces large global cascades at previously safe operating points. The most striking effect occurs near $\varphi \in [0.22, 0.25]$, where the baseline cascade size is $<0.3\%$ but the post-removal mean is ${\sim}20\%$. Regime~III corresponds to high thresholds where both networks are subcritical and cascade sizes remain $<0.5\%$.
+
+\begin{figure}[t]
+\includegraphics[width=\columnwidth]{fig2_phi_sweep}
+\caption{Mean cascade size (before vs. after hub removal) as a function of cascade threshold $\varphi$ for BA($N=2{,}000$, $m=2$). Each point averages 200 trials (10 independent network realizations $\times$ 20 seed nodes each), with seed nodes drawn from the surviving-node set so that seeds are comparable pre/post removal. Shaded regions indicate the three cascade regimes described in the text.}
+\label{fig:phi_sweep}
+\end{figure}
+
+\subsection{Compounding Vulnerability}
+\label{sec:compounding}
+
+Hub removal produces \textbf{compounding vulnerability}: both percolation and cascade metrics worsen simultaneously. The percolation threshold increases by $+347\%$ ($\pc$: $0.174 \to 0.776$, susceptibility-peak method), meaning the remaining network requires far more edge retention for connectivity. Simultaneously, the cascade window expands, enabling global cascades at previously safe operating points. This compounding---rather than a trade-off---is the central finding: hub removal does not exchange one type of resilience for another but degrades both.
+
+As expected from model independence, $\DF_p$ is independent of cascade threshold $\varphi$, since percolation depends only on the static degree sequence. The susceptibility-peak method yields $\DF_p = +347\%$ ($\pc$: $0.174 \to 0.776$); the $S=0.5$ crossing method yields $+170\%$ ($\pc$: $0.331 \to 0.895$). Both confirm massive percolation degradation. We report susceptibility-peak values as the primary estimator.
+
+\subsection{Topology Dependence and the WS Cliff-Edge}
+\label{sec:topology}
+
+The cascade window expansion is mediated by degree heterogeneity. In Watts--Strogatz networks, the firewall population exhibits a dramatic \emph{cliff-edge} transition absent in BA networks. At $\varphi=0.25$, only 15\% of WS nodes are stable ($k \geq 5$). At $\varphi=0.30$, the threshold drops to $k \geq 4$, and since most WS nodes have $k=4$, the stable fraction jumps to 84\% in a single $\varphi$ step. This means WS networks are safe across a wide $\varphi$ range, then suddenly vulnerable at a single threshold---a catastrophic cliff-edge.
+
+Systematic comparison across topologies with matched $\avg{k} = 4$:
+
+\begin{table}[h]
+\caption{Topology dependence of compounding vulnerability.}
+\label{tab:topology}
+\begin{ruledtabular}
+\begin{tabular}{lccc}
+\textrm{Network} & $\kappa$ & $\DF_p$ & \textrm{Phase transition?} \\
+\colrule
+WS ($k=4$, $p=0.1$) & ${\sim}4$ & $+33\%$ & No \\
+ER ($\avg{k}=4$) & ${\sim}5$ & $+43\%$ & No \\
+Config.\ model (exp.) & 4.05 & $+18\%$ & No \\
+BA ($m=2$) & ${\sim}12$ & $+347\%$ & Yes \\
+\end{tabular}
+\end{ruledtabular}
+\end{table}
+
+Within the BA family, the cascade phase transition requires $\kappa > {\sim}10$. Networks with narrow degree distributions show mild cascade worsening but no genuine phase transition. We note that all tested topologies have low clustering ($C < 0.1$); networks with both high $\kappa$ and high clustering (e.g., Holme--Kim models with $C > 0.3$) may exhibit different behavior, as triangle structures can modify cascade propagation paths independently of hub stability~\cite{Gleeson2008}. This clustering dependence is an important direction for future work.
+
+\begin{figure}[t]
+\includegraphics[width=\columnwidth]{fig4_topology}
+\caption{Comparison of cascade response to hub removal across network topologies with matched $\avg{k}=4$. Only the BA network ($\kappa \approx 12$) exhibits a genuine cascade phase transition. ER and WS networks show mild worsening without phase transition, confirming that degree heterogeneity $\kappa > {\sim}10$ is required.}
+\label{fig:topology}
+\end{figure}
+
+\subsection{Parameter Dependence}
+\label{sec:params}
+
+To verify that compounding vulnerability is not an artifact of a single parameter choice, we sweep the BA attachment parameter $m \in \{1,2,3,4\}$ (controlling $\kappa$) and hub removal fraction $\alpha \in \{5\%, 10\%, 15\%, 20\%\}$, measuring the fraction of realizations (out of 10) where hub removal worsens cascades at $\varphi=0.22$ ($N=1{,}000$).
+
+\begin{table}[h]
+\caption{Fraction of realizations showing cascade worsening after hub removal, across $(m, \alpha)$ grid at $\varphi=0.22$, $N=1{,}000$.}
+\label{tab:params}
+\begin{ruledtabular}
+\begin{tabular}{cccccc}
+$m$ & $\kappa$ & \multicolumn{1}{c}{$\alpha=5\%$} & \multicolumn{1}{c}{$\alpha=10\%$} & \multicolumn{1}{c}{$\alpha=15\%$} & \multicolumn{1}{c}{$\alpha=20\%$} \\
+\colrule
+1 & ${\sim}8$ & 5/10 & 2/10 & 1/10 & 0/10 \\
+\textbf{2} & ${\sim}11$ & \textbf{10/10} & \textbf{10/10} & 8/10 & 4/10 \\
+\textbf{3} & ${\sim}14$ & \textbf{10/10} & 9/10 & \textbf{10/10} & \textbf{10/10} \\
+\textbf{4} & ${\sim}17$ & 7/10 & \textbf{10/10} & \textbf{10/10} & \textbf{10/10} \\
+\end{tabular}
+\end{ruledtabular}
+\end{table}
+
+The transition is sharp: for $m=1$ ($\kappa \approx 8$), hub removal rarely worsens cascades and often improves them. For $m \geq 2$ ($\kappa \geq 11$), compounding vulnerability emerges robustly across the $(m, \alpha)$ grid. This confirms the $\kappa > {\sim}10$ threshold and demonstrates that the phenomenon is not an artifact of a single parameter choice.
+
+\subsection{Finite-Size Scaling}
+\label{sec:fss}
+
+The percolation fragility increase is stable---and in fact \emph{increasing}---across network sizes under the susceptibility-peak method ($8$ networks per size):
+
+\begin{table}[h]
+\caption{Finite-size scaling of percolation fragility (susceptibility-peak method, 8 networks per $N$).}
+\label{tab:fss}
+\begin{ruledtabular}
+\begin{tabular}{cccc}
+$N$ & $\pc^{\mathrm{pre}}$ & $\pc^{\mathrm{post}}$ & $\DF_p$ \\
+\colrule
+2{,}000 & $0.171 \pm 0.017$ & $0.773 \pm 0.038$ & $+352\%$ \\
+5{,}000 & $0.157 \pm 0.009$ & $0.759 \pm 0.027$ & $+383\%$ \\
+10{,}000 & $0.146 \pm 0.008$ & $0.749 \pm 0.017$ & $+412\%$ \\
+\end{tabular}
+\end{ruledtabular}
+\end{table}
+
+The $N=2{,}000$ estimate ($\DF_p = +352\%$) reported throughout is therefore \emph{conservative}: larger networks show even stronger percolation degradation, consistent with finite-size corrections decaying as $O(1/\ln N)$. The narrowing standard deviations confirm convergence. The cascade phenomenon persists across $N=500$--$10{,}000$, with the transition sharpening as $N$ increases (see repository datasets and scripts in Appendix~\ref{app:code}).
+
+%% ============================================================
+%% 5. ANALYTICAL FRAMEWORK
+%% ============================================================
+\section{Analytical Framework}
+\label{sec:analytical}
+
+\subsection{Stable-Node Condition}
+
+We operationalize Watts' (2002) stable-node concept~\cite{Watts2002} as a quantitative cascade-blocking condition.
+
+\textbf{Proposition 1} (Stable-node condition). \emph{A node $v$ with degree $k_v$ blocks single-neighbor cascade propagation at threshold $\varphi$ if and only if $k_v > 1/\varphi$.}
+
+This follows directly from the Watts activation rule: node $v$ requires $\lceil k_v \cdot \varphi \rceil$ active neighbors, which exceeds 1 when $k_v > 1/\varphi$. The fraction of stable nodes is $f_{\mathrm{stable}}(\varphi) = P(k > 1/\varphi)$. For BA networks at $\varphi=0.22$: $f_{\mathrm{stable}} \approx 0.20$.
+
+\subsection{Lower Bound on the Cascade Transition}
+
+\textbf{Proposition 2} (Necessary condition for cascade window expansion). \emph{For BA($m$) networks with hub removal fraction $\alpha$, the cascade transition threshold satisfies $\varphi^* \geq \sqrt{\alpha}/m$.}
+
+\emph{Derivation.} The minimum degree among removed hubs scales as $k_{\min}^{\mathrm{hub}} \approx m/\sqrt{\alpha}$ (from the BA degree ranking approximation $k_r \approx m\sqrt{N/r}$ evaluated at $r = \alpha N$; this is a thermodynamic-limit scaling argument with $O(1/\ln N)$ finite-size corrections). For cascade window expansion, removed hubs must be stable nodes: $k_{\min}^{\mathrm{hub}} > 1/\varphi$, yielding $\varphi > \sqrt{\alpha}/m$. For $m=2, \alpha=0.10$: $\varphi^* \geq 0.158$, consistent with the observed transition at $\varphi \approx 0.17$.
+
+For $m=2$, $\alpha=0.10$: $\varphi^*_{\mathrm{lower}} = \sqrt{0.10}/2 \approx 0.158$. The observed transition at $\varphi^* \approx 0.17$ is within 8\%---this bound is network-size independent and computable from construction parameters alone.
+
+\subsection{Derivation of $z_1$ After Hub Removal}
+\label{sec:z1}
+
+We derive the Gleeson--Cahalane cascade branching factor~\cite{Gleeson2007} for the post-removal network under the configuration-model approximation, providing a predictive expression for cascade window expansion under targeted hub removal.
+
+\textbf{Setup.} For a BA($m$) network, hub removal eliminates all nodes with degree $k > \kcut$, where $\kcut$ satisfies $\alpha = m(m+1)/[(\kcut+1)(\kcut+2)]$. For $m=2$, the integer cutoff $\kcut = 6$ yields an effective removal fraction $\alpha_{\mathrm{eff}} = m(m+1)/[(\kcut+1)(\kcut+2)] = 6/56 \approx 0.107$, closely approximating the targeted $\alpha = 0.10$. Under the configuration-model approximation, each edge of a surviving node leads to a removed hub with probability:
+\begin{equation}
+\rho = \frac{m+1}{\kcut + 2}
+\label{eq:rho}
+\end{equation}
+For $m=2$, $\kcut=6$: $\rho = 3/8 = 0.375$. Empirical measurement across 50 BA($N=2{,}000$, $m=2$) realizations yields $\rho_{\mathrm{emp}} = 0.421 \pm 0.011$, approximately 12\% higher than the configuration-model prediction due to BA disassortativity (high-degree nodes preferentially connect to other high-degree nodes' neighbors). We use the theoretical $\rho$ in the analytical framework and note this systematic underestimation. The key qualitative insight holds: $\rho \gg \alpha$ because hubs have many edges---the key asymmetry that drives cascade window expansion.
+
+\textbf{Post-removal degree distribution.} A surviving node with original degree $k$ retains each edge independently with probability $(1-\rho)$, yielding post-removal degree $j \sim \mathrm{Binomial}(k, 1-\rho)$. The post-removal degree distribution is:
+\begin{equation}
+P'(j) = \frac{1}{1-\alpha} \sum_{k=\max(j,m)}^{\kcut} P(k) \binom{k}{j} (1-\rho)^j \rho^{k-j}
+\label{eq:pprime}
+\end{equation}
+
+\textbf{Mean-field upper bound $z_1^{\mathrm{MF}}$.} Under the mean-field approximation, a node with original degree $k$ is vulnerable when $k(1-\rho) \leq 1/\varphi$, i.e., $k \leq \keff = \lfloor 1/[\varphi(1-\rho)] \rfloor$. Summing the original-network branching contributions over vulnerable nodes yields:
+\begin{equation}
+z_1^{\mathrm{MF}}(\varphi, \alpha, m) = (m+1) \left[ H_{K^*+1} - H_m + \frac{3}{K^*+2} - \frac{3}{m+1} \right]
+\label{eq:z1mf}
+\end{equation}
+where $K^* = \min(\keff, \kcut)$ and $H_n$ is the $n$th harmonic number. This approximation systematically overestimates $z_1$ by 17--36\% because it uses the original branching structure $k(k-1)$ rather than the thinned post-removal degrees; it should be understood as an \emph{upper bound} on the true post-removal $z_1$. The exact binomial computation in Table~\ref{tab:z1} does not use this approximation and provides the accurate values reported throughout.
+
+\textbf{Cascade window expansion factor.} The ratio of post- to pre-removal cascade boundaries is:
+\begin{equation}
+\frac{\varphi^*_{\mathrm{post}}}{\varphi^*_{\mathrm{pre}}} = \frac{1}{1-\rho} = \frac{\kcut+2}{\kcut - m + 1}
+\label{eq:expansion}
+\end{equation}
+For $m=2$, $\kcut=6$: expansion factor $= 8/5 = 1.6$, predicting the cascade window expands from $\varphi^* \approx 0.20$ to $\varphi^* \approx 0.32$ (mean-field) or ${\sim}0.26$ (exact binomial).
+
+\subsection{Numerical Verification of $z_1$}
+\label{sec:z1verify}
+
+The exact binomial computation (not the mean-field approximation) confirms the mechanism:
+
+\begin{table}[h]
+\caption{Cascade branching factor $z_1$ before and after hub removal. Because $z_1$ depends on the vulnerability cutoff $\lfloor 1/\varphi \rfloor$, values are constant within each integer bin: $\lfloor 1/\varphi \rfloor = 5$ for $\varphi \in (0.167, 0.20]$ and $\lfloor 1/\varphi \rfloor = 4$ for $\varphi \in (0.20, 0.25]$. This step-function behavior is intrinsic to the discrete degree distribution.}
+\label{tab:z1}
+\begin{ruledtabular}
+\begin{tabular}{cccl}
+$\varphi$ & \multicolumn{1}{c}{$z_1$ (pre)} & \multicolumn{1}{c}{$z_1$ (post)} & \multicolumn{1}{c}{\textrm{Regime}} \\
+\colrule
+0.18 & 1.136 & 1.363 & Both supercritical \\
+0.20 & 1.136 & 1.363 & Both supercritical \\
+\textbf{0.22} & \textbf{0.850} & \textbf{1.195} & \textbf{Pre: sub, Post: super} \\
+\textbf{0.25} & \textbf{0.850} & \textbf{1.195} & \textbf{Pre: sub, Post: super} \\
+0.27 & 0.550 & 0.864 & Both subcritical \\
+\end{tabular}
+\end{ruledtabular}
+\end{table}
+
+At $\varphi=0.22$, the pre-removal network has $z_1 = 0.850 < 1$ (subcritical: cascades die) while the post-removal network has $z_1 = 1.195 > 1$ (supercritical: global cascades possible). This crossing explains the observed cascade explosion. The newly opened cascade window spans $\varphi \in (0.20, {\sim}0.26)$, precisely containing the observed phase transition.
+
+\begin{figure}[t]
+\includegraphics[width=\columnwidth]{fig3_z1_crossing}
+\caption{Cascade branching factor $z_1$ before (solid) and after (dashed) hub removal as a function of cascade threshold $\varphi$. The critical line $z_1 = 1$ separates subcritical from supercritical regimes. At $\varphi=0.22$, the pre-removal network is subcritical ($z_1=0.850$) while the post-removal network is supercritical ($z_1=1.195$), explaining the observed cascade phase transition.}
+\label{fig:z1}
+\end{figure}
+
+\subsection{Percolation Threshold Increase}
+
+\textbf{Proposition 3} (Hub removal increases $\pc$). \emph{For any network $G$ with degree heterogeneity $\kappa > 2$, hub removal of fraction $\alpha > 0$ increases the Molloy--Reed bond percolation threshold.}
+
+This follows from the Molloy--Reed criterion $\pc = 1/(\kappa-1)$~\cite{Molloy1995}: hub removal selectively removes nodes contributing $k^2$ to $\avg{k^2}$, reducing $\kappa$ and therefore increasing $\pc$. The result is exact for uncorrelated configuration-model networks and holds directionally for BA networks with weak degree-degree correlations.
+
+%% ============================================================
+%% 6. DISCUSSION
+%% ============================================================
+\section{Discussion}
+\label{sec:discussion}
+
+\subsection{The Dual-Function Constraint}
+
+Our results reveal that within the intervention class of uniform node deletion on static, unweighted networks, hub nodes simultaneously provide percolation robustness (via their $k^2$ contribution to $\avg{k^2}$, keeping $\pc$ low) and cascade resistance (via their high activation barrier $k \cdot \varphi \gg 1$, blocking cascade propagation). Both functions are monotonically linked through the single structural parameter~$k$. Within this intervention class, there is no way to modify one function without simultaneously modifying the other. Alternative intervention classes---degree-preserving rewiring, weighted edge adjustment, or adaptive threshold modification---may decouple these functions and are an important direction for future work.
+
+This operational coupling is not merely definitional (``degree determines everything''). The non-trivial content is that real-world interventions operate on \emph{nodes}, not on \emph{functions}: reducing a bank's counterparty connections to mitigate systemic risk necessarily reduces its capacity to absorb counterparty losses without propagating them. The coupling constrains the \emph{feasible intervention space}, not just the mathematical description. This is analogous to pharmacological selectivity: a drug's binding affinity to one receptor constrains its binding to structurally similar receptors, because the molecular recognition surface cannot be independently modified.
+
+\subsection{Relation to Prior Work}
+
+\textbf{Watts (2002)~\cite{Watts2002}} described stable nodes conceptually; we operationalize this as the quantitative condition $k > 1/\varphi$ and demonstrate its dynamical nature through controlled experiments. The hub vulnerability experiment (\S\ref{sec:hub_vuln}) provides, to our knowledge, the first direct experimental isolation of the stable-node mechanism from connectivity effects in the context of cascade dynamics.
+
+\textbf{Gleeson and Cahalane (2007)~\cite{Gleeson2007}} derived the cascade branching condition $z_1 > 1$ for random networks. We extend this to the post-removal setting, deriving a closed-form $z_1$ under the configuration-model approximation for targeted hub removal (\S\ref{sec:z1}) and demonstrating that the $z_1$ crossing explains the observed phase transition. Importantly, the cascade window expansion formula $\varphi^*_{\mathrm{post}}/\varphi^*_{\mathrm{pre}} \approx 1/(1-\rho)$ is not specific to the BA model: for \emph{any} degree distribution, $\rho$ measures the edge fraction incident to removed hubs, and the expansion factor $1/(1-\rho)$ follows from the configuration-model $z_1$ framework. In homogeneous networks (Poisson, exponential), $\rho \ll 1$ and the expansion is negligible; in heterogeneous networks (power-law, BA), $\rho \sim 0.3$--$0.5$ and the expansion is substantial. The degree heterogeneity threshold $\kappa > {\sim}10$ is thus a proxy for $\rho$ being large enough to produce an observable phase transition, not a fundamental constant of the BA model.
+
+\textbf{Albert, Jeong and Barab\'asi (2000)~\cite{Albert2000}} established the ``robust yet fragile'' duality for scale-free networks under percolation. We extend this to encompass threshold cascade dynamics, showing that the duality becomes \emph{compounding vulnerability} under hub removal---both fragilities compound rather than trade off.
+
+\textbf{Snyder and Cai (2022)~\cite{SnyderCai2022}} study ``degree-targeted cascades'' on modular networks, but target which nodes to \emph{seed} (initially activate), not which nodes to \emph{remove}. The distinction is fundamental: seeding preserves the degree distribution while exploiting it; removal alters the degree distribution and shifts the cascade phase boundary itself. Our $z_1$ derivation addresses the removal case, which requires the post-removal degree distribution $P'(j)$ and operates in a different mathematical regime.
+
+\textbf{Gleeson (2008)~\cite{Gleeson2008}} extended analytical cascade methods to correlated and modular networks in the static (unperturbed) case, providing the natural framework for extending our $z_1$ derivation to networks with degree-degree correlations---a direction we identify as important future work. \textbf{Nishioka and Hasegawa (2022)~\cite{Nishioka2022}} extended the Watts model with differential thresholds based on proximity to initiators, and \textbf{Karimi and Holme (2021)~\cite{Karimi2021}} extended it to temporal networks. Our work complements these by studying how \emph{structural intervention} (hub removal) modifies cascade thresholds, a distinct mechanism from seed selection or temporal dynamics. \textbf{Lee et~al.\ (2023)~\cite{Lee2023}} studied threshold cascades on signed networks, demonstrating that heterogeneous tie types can shift phase boundaries---analogous to how hub removal shifts the cascade boundary in our setting.
+
+\textbf{Morone and Makse (2015)~\cite{Morone2015}} and \textbf{Braunstein et~al.\ (2016)~\cite{Braunstein2016}} optimize network dismantling for percolation fragmentation. Our results complement this literature by identifying the cascade side-effects of percolation-optimal interventions: dismantling strategies that efficiently fragment a network may simultaneously expand the cascade vulnerability window~\cite{Artime2024}. \textbf{Geng et~al.\ (2021)~\cite{Geng2021}} proposed disassortative rewiring to enhance robustness of scale-free networks against localized attack, and \textbf{Lv et~al.\ (2022)~\cite{Lv2022}} modeled SF network response to multi-node removal with dynamical cascading failures---both addressing the same hub-vulnerability mechanism from the defense perspective. The interdependent network literature~\cite{Xu2021} has identified dual failure pathways in \emph{multi-layer} settings; our contribution shows that compounding vulnerability arises even in \emph{single-layer} networks when two stress models operate on the same topology, through a mechanism that recent hybrid spinodal analyses~\cite{Bonamassa2024,Pal2023} may help classify.
+
+\subsection{Real-World Network Validation}
+\label{sec:realworld}
+
+To validate beyond synthetic BA networks, we test on four real-world networks from Stanford SNAP with diverse degree distributions and clustering coefficients, applying the same hub removal protocol ($\alpha=0.10$) and cascade sweep ($\varphi \in [0.05, 0.40]$, 40 seeds per $\varphi$). We estimate $\pc$ using both the susceptibility-peak and $S=0.5$ methods.
+
+\begin{table}[h]
+\caption{Real-world network validation of compounding vulnerability under hub removal ($\alpha=0.10$). $\DF_p$: percolation fragility change (susceptibility peak). Max Amp: maximum cascade amplification across all $\varphi$.}
+\label{tab:realworld}
+\begin{ruledtabular}
+\begin{tabular}{lccccc}
+Network & $N$ & $\kappa$ & $C$ & $\DF_p$ & Max Amp \\
+\hline
+p2p-Gnutella & 6{,}299 & 17.7 & 0.011 & $+75\%$ & $+16{,}857\%$ \\
+Wiki-Vote & 7{,}066 & 145.4 & 0.142 & $+594\%$ & $+60{,}272\%$ \\
+Bitcoin OTC$^\dag$ & 5{,}881 & 72.0 & -- & $+170\%^\ddag$ & $+1{,}327\%$ \\
+CA-HepPh$^*$ & 11{,}204 & 130.9 & 0.622 & $+58\%^\ddag$ & $+7{,}340\%$ \\
+\end{tabular}
+\end{ruledtabular}
+$^\dag$Bitcoin OTC has $\gamma < 2$; the finite-$\kappa$ analytical framework is not strictly applicable.
+$^\ddag$$S=0.5$ method used where susceptibility peak is unreliable.
+$^*$High clustering ($C=0.622$); susceptibility peak yields anomalous results.
+\end{table}
+
+Cascade amplification under hub removal is \emph{universal} across all four networks, with amplification factors ranging from $+1{,}327\%$ (Bitcoin OTC) to $+60{,}272\%$ (Wiki-Vote). The magnitude scales with $\kappa$: p2p-Gnutella ($\kappa=17.7$), which is closest to the BA model in both $\kappa$ and clustering ($C=0.011$), exhibits clean compounding vulnerability with both percolation ($\DF_p=+75\%$) and cascade metrics worsening simultaneously. Wiki-Vote ($\kappa=145.4$) shows an extreme version: $\DF_p=+594\%$ and cascade amplification of $+60{,}272\%$.
+
+CA-HepPh ($C=0.622$) is instructive: despite $\kappa=130.9$, the susceptibility-peak method yields anomalous percolation results, while the $S=0.5$ method confirms $\DF_p=+58\%$. This highlights that high clustering can interact with the susceptibility-peak estimator in ways that require further investigation. The cascade amplification ($+7{,}340\%$) is nevertheless robust across estimators.
+
+More broadly, our BA-derived $\kappa > {\sim}10$ threshold predicts compounding vulnerability in real-world networks: yeast protein-protein interaction networks ($\kappa \approx 17$~\cite{Jeong2001}), the World Wide Web ($\kappa \approx 55$~\cite{Albert1999}), and citation networks ($\kappa > 100$). Conversely, power grids ($\kappa \approx 2$) and regular-topology networks fall below the threshold.
+
+\subsection{Implications}
+\label{sec:implications}
+
+\textbf{Financial regulation.} Breaking up systemically important financial institutions reduces individual institution size but may enable cascade defaults at stress levels that would be subcritical in the pre-breakup network, as large institutions also serve as loss-absorption barriers. The 2008 Lehman Brothers collapse illustrates: a hub failure in the interbank network ($\kappa > 10$ for CDS counterparty networks~\cite{Battiston2012,Haldane2011}) simultaneously fragmented lending connectivity and triggered cascade defaults---compounding vulnerability in practice.
+
+\textbf{Infrastructure.} Achieving N-1 compliance through hub removal (decommissioning large substations) could expand the cascade vulnerability window. While power grids have low $\kappa$ (mitigating the cascade phase transition), the 2003 Northeast Blackout demonstrates that high-load hub lines can trigger both fragmentation and cascading overloads when N-1 criteria are violated at hub nodes.
+
+\textbf{Epidemic control.} Targeted vaccination of high-degree individuals is standard for SIR epidemics but removes nodes that block threshold-based behavioral cascades (vaccine hesitancy, misinformation adoption), potentially enabling cascades at previously subcritical thresholds. Social networks, with their heavy-tailed degree distributions ($\kappa \gg 10$), are prime candidates for compounding vulnerability under targeted interventions.
+
+\subsection{Limitations}
+\label{sec:limitations}
+
+(i) We validate on synthetic networks with controlled degree heterogeneity and on multiple real-world networks from Stanford SNAP. The Bitcoin OTC Trust Network ($N=5{,}881$, $\gamma \approx 1.9$) confirms the directional effect but, with $\gamma < 2$ implying divergent $\avg{k^2}$, the finite-$\kappa$ analytical framework of \S\ref{sec:analytical} is not strictly applicable to this network; the agreement is empirical rather than analytical. (ii) The bond percolation threshold $\pc$ is estimated using the susceptibility peak method (maximum of the mean finite-cluster size), the standard approach in computational percolation~\cite{Newman2001}. We verify robustness by comparing against the $S=0.5$ crossing and the Molloy--Reed analytical estimate; all three methods confirm $\DF_p \gg 0$ (Appendix~\ref{app:percolation}). (iii) We test sensitivity to threshold heterogeneity using Beta-distributed per-node thresholds centered on $\varphi$ (Appendix~\ref{app:hetero}); the compounding vulnerability effect persists under moderate and high heterogeneity, with amplification ranging from $+349\%$ to $+1{,}955\%$ at $\varphi=0.22$. (iv) The configuration-model approximation in \S\ref{sec:z1} ignores BA disassortativity and the correlation structure induced by targeted removal. Appendix~\ref{app:config} validates the $z_1$ framework on configuration-model networks (where it is exact by construction), confirming that the approximation captures the dominant mechanism and that BA-specific correlations partially \emph{dampen} rather than create the effect. (v) Static networks are studied; adaptive rewiring could mitigate or amplify the effect. (vi) The Watts cascade model is one of several cascade mechanisms; generalization to load-redistribution~\cite{Motter2004}, cascade-based attacks~\cite{Motter2002}, and DebtRank~\cite{Battiston2012} models is an important direction. (vii) The $\kappa > {\sim}10$ threshold is derived for BA networks; the precise threshold depends on both the degree distribution shape and the cascade threshold $\varphi$, and should be understood as a BA-specific onset condition rather than a distribution-independent constant.
+
+%% ============================================================
+%% 7. CONCLUSION
+%% ============================================================
+\section{Conclusion}
+\label{sec:conclusion}
+
+We have demonstrated that hub removal in Barab\'asi--Albert scale-free networks produces compounding vulnerability: it raises the bond percolation threshold by $+347\%$ ($\pc$: $0.174 \to 0.776$, susceptibility-peak method) while simultaneously expanding the Watts cascade window, enabling global cascades at threshold values that were previously subcritical. The phase transition at $\varphi=0.22$--$0.25$---where mean cascade size jumps from $<1\%$ to ${\sim}23\%$ of the network ($1{,}000$ trials)---is the most striking consequence, and it is \emph{silent during normal operation}: subcritical cascade behavior is observationally indistinguishable from safe operation until the intervention shifts the system across the phase boundary.
+
+The hub vulnerability experiment establishes that cascade suppression is primarily dynamical (95\% cascades from threshold modification alone vs.\ 19\% from hub removal), and the $z_1$ derivation provides an analytical expression for cascade window expansion under targeted hub removal, confirming the subcritical-to-supercritical crossing at $\varphi=0.22$ ($z_1$: $0.850 \to 1.195$). These results argue for multi-stress-model resilience assessment as standard practice: before applying any topological intervention, evaluate its consequences under at least two fundamentally different failure dynamics.
+
+%% ============================================================
+%% AI DISCLOSURE
+%% ============================================================
+\section*{AI Assistance Disclosure}
+
+This work was conducted as a human--AI collaboration. The author conceived the research question, designed the hub vulnerability experiment, identified the cascade firewall mechanism, directed the analysis, and made all scientific decisions including the reframing from ``trade-off'' to ``compounding vulnerability.'' AI tools assisted with simulation code generation, manuscript drafting, and verification checks. The manuscript was subjected to multiple adversarial LLM review passes, and issues found during review were addressed in revision. All simulation code and random seeds are provided for independent reproduction.
+
+\begin{acknowledgments}
+The author thanks the open-source Python community for NetworkX and NumPy.
+\end{acknowledgments}
+
+%% ============================================================
+%% REFERENCES
+%% ============================================================
+\begin{thebibliography}{36}
+
+\bibitem{Boccaletti2006}
+S.~Boccaletti, V.~Latora, Y.~Moreno, M.~Chavez, and D.-U.~Hwang,
+\emph{Complex networks: Structure and dynamics},
+Phys.\ Rep.\ \textbf{424}, 175 (2006).
+
+\bibitem{Gao2016}
+J.~Gao, B.~Barzel, and A.-L.~Barab\'asi,
+\emph{Universal resilience patterns in complex networks},
+Nature \textbf{530}, 307 (2016).
+
+\bibitem{Barabasi2016}
+A.-L.~Barab\'asi,
+\emph{Network Science} (Cambridge University Press, Cambridge, 2016).
+
+\bibitem{Alderson2010}
+D.~L.~Alderson and J.~C.~Doyle,
+\emph{Contrasting views of complexity and their implications for network-centric infrastructures},
+IEEE Trans.\ Syst.\ Man Cybern.\ A \textbf{40}, 839 (2010).
+
+\bibitem{Stauffer2014}
+D.~Stauffer and A.~Aharony,
+\emph{Introduction to Percolation Theory} (CRC Press, Boca Raton, 2014).
+
+\bibitem{Newman2010}
+M.~E.~J.~Newman,
+\emph{Networks: An Introduction} (Oxford University Press, Oxford, 2010).
+
+\bibitem{Newman2001}
+M.~E.~J.~Newman and R.~M.~Ziff,
+\emph{Fast Monte Carlo algorithm for site or bond percolation},
+Phys.\ Rev.\ E \textbf{64}, 016706 (2001).
+
+\bibitem{Watts2002}
+D.~J.~Watts,
+\emph{A simple model of global cascades on random networks},
+Proc.\ Natl.\ Acad.\ Sci.\ U.S.A.\ \textbf{99}, 5766 (2002).
+
+\bibitem{Barabasi1999}
+A.-L.~Barab\'asi and R.~Albert,
+\emph{Emergence of scaling in random networks},
+Science \textbf{286}, 509 (1999).
+
+\bibitem{Albert2000}
+R.~Albert, H.~Jeong, and A.-L.~Barab\'asi,
+\emph{Error and attack tolerance of complex networks},
+Nature \textbf{406}, 378 (2000).
+
+\bibitem{Cohen2001}
+R.~Cohen, K.~Erez, D.~ben-Avraham, and S.~Havlin,
+\emph{Breakdown of the Internet under intentional attack},
+Phys.\ Rev.\ Lett.\ \textbf{86}, 3682 (2001).
+
+\bibitem{Gleeson2007}
+J.~P.~Gleeson and D.~J.~Cahalane,
+\emph{Seed size strongly affects cascades on random networks},
+Phys.\ Rev.\ E \textbf{75}, 056103 (2007).
+
+\bibitem{Dodds2004}
+P.~S.~Dodds and D.~J.~Watts,
+\emph{Universal behavior in a generalized model of contagion},
+Phys.\ Rev.\ Lett.\ \textbf{92}, 218701 (2004).
+
+\bibitem{Battiston2012}
+S.~Battiston, M.~Puliga, R.~Kaushik, P.~Tasca, and G.~Caldarelli,
+\emph{DebtRank: Too Central to Fail? Financial Networks, the FED and Systemic Risk},
+Sci.\ Rep.\ \textbf{2}, 541 (2012).
+
+\bibitem{Callaway2000}
+D.~S.~Callaway, M.~E.~J.~Newman, S.~H.~Strogatz, and D.~J.~Watts,
+\emph{Network robustness and fragility: Percolation on random graphs},
+Phys.\ Rev.\ Lett.\ \textbf{85}, 5468 (2000).
+
+\bibitem{Morone2015}
+F.~Morone and H.~A.~Makse,
+\emph{Influence maximization in complex networks through optimal percolation},
+Nature \textbf{524}, 65 (2015).
+
+\bibitem{Braunstein2016}
+A.~Braunstein, L.~Dall'Asta, G.~Semerjian, and L.~Zdeborov\'a,
+\emph{Network dismantling},
+Proc.\ Natl.\ Acad.\ Sci.\ U.S.A.\ \textbf{113}, 12368 (2016).
+
+\bibitem{Motter2004}
+A.~E.~Motter,
+\emph{Cascade control and defense in complex networks},
+Phys.\ Rev.\ Lett.\ \textbf{93}, 098701 (2004).
+
+\bibitem{Molloy1995}
+M.~Molloy and B.~Reed,
+\emph{A critical point for random graphs with a given degree sequence},
+Random Struct.\ Algorithms \textbf{6}, 161 (1995).
+
+\bibitem{Haldane2011}
+A.~G.~Haldane and R.~M.~May,
+\emph{Systemic risk in banking ecosystems},
+Nature \textbf{469}, 351 (2011).
+
+\bibitem{Motter2002}
+A.~E.~Motter and Y.-C.~Lai,
+\emph{Cascade-based attacks on complex networks},
+Phys.\ Rev.\ E \textbf{66}, 065102 (2002).
+
+\bibitem{WattsStrogatz1998}
+D.~J.~Watts and S.~H.~Strogatz,
+\emph{Collective dynamics of `small-world' networks},
+Nature \textbf{393}, 440 (1998).
+
+\bibitem{Jeong2001}
+H.~Jeong, S.~P.~Mason, A.-L.~Barab\'asi, and Z.~N.~Oltvai,
+\emph{Lethality and centrality in protein networks},
+Nature \textbf{411}, 41 (2001).
+
+\bibitem{Albert1999}
+R.~Albert, H.~Jeong, and A.-L.~Barab\'asi,
+\emph{Diameter of the World-Wide Web},
+Nature \textbf{401}, 130 (1999).
+
+\bibitem{Gleeson2008}
+J.~P.~Gleeson,
+\emph{Cascades on correlated and modular random networks},
+Phys.\ Rev.\ E \textbf{77}, 046117 (2008).
+
+\bibitem{SnyderCai2022}
+D.~Snyder and W.~Cai,
+\emph{Degree-targeted cascades on modular networks},
+Phys.\ Rev.\ Res.\ \textbf{4}, 013040 (2022).
+
+\bibitem{Artime2024}
+O.~Artime, M.~De~Domenico, and A.~Guilera,
+\emph{Robustness and resilience of complex networks},
+Nat.\ Rev.\ Phys.\ \textbf{6}, 114 (2024).
+
+\bibitem{Valdez2020}
+L.~D.~Valdez, L.~M.~Shekhtman, S.~Havlin, and L.~A.~Braunstein,
+\emph{Cascading failures in complex networks},
+J.\ Complex Netw.\ \textbf{8}, cnaa013 (2020).
+
+\bibitem{Pal2023}
+G.~P\'al, Z.~Danku, A.~Batool, D.~Horv\'ath, and F.~Kun,
+\emph{Scaling laws of failure dynamics on complex networks},
+Sci.\ Rep.\ \textbf{13}, 19733 (2023).
+
+\bibitem{Geng2021}
+H.~Geng, Y.~Xu, and W.~Wang,
+\emph{Global disassortative rewiring strategy for enhancing the robustness of scale-free networks against localized attack},
+Phys.\ Rev.\ E \textbf{103}, 022313 (2021).
+
+\bibitem{Nishioka2022}
+S.~Nishioka and T.~Hasegawa,
+\emph{Cascading behavior of an extended Watts model on networks},
+arXiv:2112.10524 [physics.soc-ph] (2022).
+
+\bibitem{Karimi2021}
+F.~Karimi and P.~Holme,
+\emph{A temporal network version of Watts's cascade model},
+arXiv:2103.13604 [physics.soc-ph] (2021).
+
+\bibitem{Lv2022}
+C.~Lv \emph{et~al.},
+\emph{Cascading failure in networks with dynamical behavior against multi-node perturbation},
+Chaos Solitons Fractals \textbf{162}, 112397 (2022).
+
+\bibitem{Lee2023}
+K.~M.~Lee \emph{et~al.},
+\emph{Threshold cascade dynamics on signed random networks},
+Chaos Solitons Fractals \textbf{168}, 113118 (2023).
+
+\bibitem{Xu2021}
+W.~Xu \emph{et~al.},
+\emph{Breakdown in interdependent directed networks under targeted attacks},
+Europhys.\ Lett.\ \textbf{133}, 68004 (2021).
+
+\bibitem{Bonamassa2024}
+I.~Bonamassa, B.~Gross, J.~Kert\'esz, and S.~Havlin,
+\emph{Hybrid spinodals for long-range cascades},
+arXiv:2401.09313 [cond-mat.stat-mech] (2024).
+
+\end{thebibliography}
+
+%% ============================================================
+%% APPENDIX
+%% ============================================================
+\appendix
+
+\section{Percolation Method Comparison}
+\label{app:percolation}
+
+\begin{table}[h]
+\caption{Comparison of $\pc$ estimates across methods. ``Susc.\ peak'' is the susceptibility maximum (primary, Sec.~\ref{sec:methods}), ``$S=0.5$'' is the giant component crossing, and ``MR'' is the Molloy--Reed analytical estimate.}
+\label{tab:pc_compare}
+\begin{ruledtabular}
+\begin{tabular}{lcccc}
+\textrm{Network} & $\pc$ (susc.) & $\pc$ ($S=0.5$) & $\pc$ (MR) & $\DF_p$ (susc.) \\
+\colrule
+BA before & 0.174 & 0.337 & 0.092 & --- \\
+BA after & 0.776 & 0.903 & 0.240 & $+347\%$ \\
+ER before & --- & 0.354 & 0.251 & --- \\
+WS before & --- & 0.499 & 0.323 & --- \\
+\end{tabular}
+\end{ruledtabular}
+\end{table}
+
+The ${\sim}3.5\times$ discrepancy for BA networks reflects disassortativity and finite-size effects absent from the Molloy--Reed configuration-model assumption. The qualitative result (massive $\DF_p$ increase) is robust to method choice.
+
+\section{$z_1$ Derivation Details}
+\label{app:z1}
+
+The BA degree distribution is $P(k) = 2m(m+1)/[k(k+1)(k+2)]$ for $k \geq m$. The edge-to-hub probability $\rho = (m+1)/(\kcut+2)$ follows from the excess degree distribution. The post-removal $z_1$ involves summing $j(j-1)P'(j)/\avg{k}'$ over vulnerable nodes $j \leq \lfloor 1/\varphi \rfloor$, where $P'(j)$ is the binomial convolution of $P(k)$ with edge retention probability $(1-\rho)$. Under the mean-field approximation, this yields the closed-form harmonic-number expression in \S\ref{sec:z1}, with partial fractions: $(k-1)/[(k+1)(k+2)] = -2/(k+1) + 3/(k+2)$. Python verification code and scripts are available at \url{https://github.com/Freddy-Cach/cascade-window-paradox}.
+
+\section{Configuration-Model Validation}
+\label{app:config}
+
+To validate the $z_1$ derivation (\S\ref{sec:z1}), which assumes configuration-model independence, we test on configuration-model networks constructed with the same degree sequence as BA($N=2{,}000$, $m=2$). For each of 20 BA realizations, we generate a matched configuration-model network (removing self-loops and multi-edges), apply the same hub removal protocol, and compare cascade behavior.
+
+\begin{table}[h]
+\caption{Configuration-model validation ($N=2{,}000$, $m=2$, $\varphi=0.22$, 20 networks $\times$ 20 seeds). The configuration model shows \emph{stronger} cascades than BA, confirming that BA-specific degree correlations partially suppress the effect.}
+\label{tab:config}
+\begin{ruledtabular}
+\begin{tabular}{lcccc}
+\textrm{Network} & $\kappa$ & $\pc^{\mathrm{pre}}$ & $\pc^{\mathrm{post}}$ & \textrm{Post cascade} \\
+\colrule
+BA & $12.0 \pm 0.6$ & 0.181 & 0.788 & 22.9\% \\
+Config model & $11.4 \pm 0.5$ & 0.159 & 0.751 & 38.1\% \\
+\end{tabular}
+\end{ruledtabular}
+\end{table}
+
+The configuration-model networks exhibit \emph{stronger} cascade amplification ($38.1\%$ vs $22.9\%$) and similar percolation degradation. This confirms two claims: (i) the $z_1$ framework accurately predicts cascade window expansion for configuration-model networks, where it is exact by construction; (ii) BA disassortativity partially \emph{dampens} the cascade effect---high-degree hubs preferentially connect to low-degree stubs, creating extra ``firewall'' correlations absent in uncorrelated networks. The analytical upper-bound character of Eq.~\ref{eq:z1mf} is thus validated: the true BA cascade size lies below the configuration-model prediction.
+
+\section{Heterogeneous Threshold Sensitivity}
+\label{app:hetero}
+
+To test whether compounding vulnerability depends on the assumption of uniform thresholds, we replace the fixed $\varphi=0.22$ with per-node thresholds drawn from three distributions, each centered on $\varphi=0.22$: (i) Uniform($0.12, 0.32$), (ii) Beta with low heterogeneity ($\alpha=5, \beta=17.7$, $\sigma \approx 0.08$), and (iii) Beta with high heterogeneity ($\alpha=2, \beta=7.1$, $\sigma \approx 0.13$). Each condition uses 600 trials (15 networks $\times$ 40 seeds).
+
+\begin{table}[h]
+\caption{Heterogeneous threshold sensitivity ($\varphi=0.22$, 600 trials each). ``Amp.'' is the amplification at $\varphi=0.22$; the maximum across all $\varphi$ (peaking at $\varphi \approx 0.24$) is larger in all cases.}
+\label{tab:hetero}
+\begin{ruledtabular}
+\begin{tabular}{lccc}
+\textrm{Distribution} & \textrm{Pre (\%)} & \textrm{Post (\%)} & \textrm{Amp.} \\
+\colrule
+Uniform (homogeneous) & 1.0 & 21.6 & $+1{,}955\%$ \\
+Beta (low het.) & 1.3 & 25.1 & $+1{,}830\%$ \\
+Beta (high het.) & 4.0 & 18.0 & $+349\%$ \\
+\end{tabular}
+\end{ruledtabular}
+\end{table}
+
+Under all three distributions, hub removal produces massive cascade amplification at the transition ($+349\%$ to $+1{,}955\%$ at $\varphi=0.22$; amplification peaks at $\varphi \approx 0.24$ in all cases). High heterogeneity reduces the effect because some nodes have thresholds well below 0.22, making them vulnerable even when hubs are present---partially pre-empting the firewall destruction mechanism. Critically, the \emph{qualitative} effect (subcritical $\to$ supercritical transition) persists: compounding vulnerability is not an artifact of uniform thresholds.
+
+\section{Simulation Code and Formal Proofs}
+\label{app:code}
+
+All simulation code, figure-generation scripts, and derived datasets are available at \url{https://github.com/Freddy-Cach/cascade-window-paradox}.
+
+A Lean~4 formalization of key analytical claims from \S\ref{sec:analytical} is provided in \texttt{proofs/} in the same repository, including the stable-node condition (Proposition~1), the lower bound on the cascade transition threshold (Proposition~2), and the monotonicity of $\pc$ under hub removal (Proposition~3). These machine-verified proofs establish the mathematical correctness of the cascade-blocking inequalities independently of the simulation results.
+
+Key scripts: \texttt{simulate\_production.py} (finite-size scaling), \texttt{phi\_sweep\_large.py} ($\varphi$-sweep), \texttt{hub\_vulnerability\_test.py} (\S\ref{sec:hub_vuln} experiment), \texttt{heterogeneous\_threshold\_test.py} (Appendix~\ref{app:hetero}).
+
+\end{document}

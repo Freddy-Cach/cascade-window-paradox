@@ -1,0 +1,41 @@
+{
+  "pre_removal": {
+    "kappa_mean": 12.23,
+    "kappa_std": 0.68,
+    "pc_susceptibility_peak": {
+      "mean": 0.1737,
+      "std": 0.0092
+    },
+    "pc_S05": {
+      "mean": 0.331
+    },
+    "pc_molloy_reed": {
+      "mean": 0.0894
+    }
+  },
+  "post_removal": {
+    "kappa_mean": 2.55,
+    "kappa_std": 0.06,
+    "pc_susceptibility_peak": {
+      "mean": 0.7764,
+      "std": 0.0358
+    },
+    "pc_S05": {
+      "mean": 0.8945
+    },
+    "pc_molloy_reed": {
+      "mean": 0.647
+    }
+  },
+  "comparison": {
+    "delta_F_susceptibility_pct": 347.1,
+    "delta_F_S05_pct": 170.3,
+    "delta_F_molloy_reed_pct": 623.7,
+    "methods_agree_direction": true,
+    "note": "All three methods confirm hub removal INCREASES p_c. Susceptibility peak shows STRONGER effect than S=0.5."
+  },
+  "method_comparison": {
+    "S05_vs_suscept_note": "S=0.5 underestimates \u0394F by ~50% relative to susceptibility peak. Grok review claim that S=0.5 inflates the effect is WRONG \u2014 the opposite is true.",
+    "MR_overestimates": "Molloy-Reed overestimates \u0394F (623%) due to configuration-model assumptions not holding for BA networks."
+  }
+}
