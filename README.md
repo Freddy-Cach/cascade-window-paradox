@@ -111,9 +111,10 @@ python generate_phi_figure_v4.py
 
 | Metric | Pre-removal | Post-removal | Change |
 |--------|-------------|--------------|--------|
-| Bond percolation p_c (Newman-Ziff) | 0.146 ± 0.008 | 0.654 ± 0.012 | +347% |
-| Cascade size at φ=0.22 | 0.86% | 23.1% [CI: 21.3-24.9] | Phase transition |
+| Bond percolation p_c (susceptibility peak, N=2,000) | 0.174 ± 0.009 | 0.776 ± 0.036 | +347% |
+| Cascade size at φ=0.22 (1,000 trials) | 0.86% [CI: 0.43-1.30] | 23.1% [CI: 21.3-24.9] | Phase transition |
 | z₁ branching factor at φ=0.22 | 0.850 | 1.195 | Subcritical → supercritical |
+| Hub vulnerability experiment (fixed topology) | A: 0.28% | B: 95.0% (vuln) / C: 18.7% (removed) | Dynamical > topological |
 
 ## License
 
