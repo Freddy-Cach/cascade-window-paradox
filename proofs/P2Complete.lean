@@ -9,8 +9,8 @@ set_option linter.unusedVariables false
 # Formal Verification of Core Mathematical Claims
 
 All 4 core mathematical claims from the paper, verified in Lean 4.
-Paper: "Compounding Vulnerability: Hub Removal Triggers Cascade Phase
-        Transitions While Degrading Percolation Robustness in Scale-Free
+Paper: "Compounding Vulnerability: Hub Removal Can Trigger Cascade Phase
+        Transitions While Degrading Percolation Robustness in Barabási-Albert
         Networks" (Cachero, 2026)
 arXiv: 2603.04838
 -/
