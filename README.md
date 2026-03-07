@@ -1,6 +1,6 @@
 # Compounding Vulnerability — Reproducible Code Package
 
-**Paper:** _Compounding Vulnerability: Hub Removal Triggers Cascade Phase Transitions While Degrading Percolation Robustness in Scale-Free Networks_  
+**Paper:** _Compounding Vulnerability: Hub Removal Can Trigger Cascade Phase Transitions While Degrading Percolation Robustness in Barabási-Albert Networks_  
 **Author:** Federico Cachero (federicohernancachero@gmail.com)  
 **arXiv:** [2603.04838](https://arxiv.org/abs/2603.04838)  
 **Target:** Physical Review E  
@@ -18,6 +18,16 @@ This repository contains simulation code, derived results (`RESULTS_*.json`), an
 - The cascade branching factor z₁(φ, α, m) predicts threshold crossing: pre-removal z₁ = 0.850 (subcritical) → post-removal z₁ = 1.195 (supercritical).
 
 **429,000+ simulation trials** back the claims in the paper.
+
+## What's New (v4 — March 7, 2026)
+
+- **Title updated**: "Can Trigger" (hedged claim) + "Barabási-Albert" (specific scope)
+- **Abstract shortened**: 1 concise paragraph (was 5)
+- **Real-world table improved**: Absolute cascade sizes (Cmax pre/post) replace misleading percentages
+- **Claims softened**: No-Pareto observation labeled "empirical" (not proven impossibility)
+- **References added**: Cohen et al. (2000), Brummitt et al. (2012)
+- **Propositions relabeled**: Prop 1→Definition 1, Prop 2→Observation 1 for honesty
+- **z₁ independently verified**: z1_audit.py confirms all Table V values within ±0.0003
 
 ## What's New (v2 — March 6, 2026)
 
