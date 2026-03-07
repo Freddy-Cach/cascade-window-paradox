@@ -8,15 +8,14 @@ authors:
     email: federicohernancachero@gmail.com
 repository-code: "https://github.com/Freddy-Cach/cascade-window-paradox"
 license: MIT
-version: "0.1.0"
-date-released: "2026-03-04"
+version: "0.2.0"
+date-released: "2026-03-07"
 preferred-citation:
   type: article
-  title: "Compounding Vulnerability: Hub Removal Triggers Cascade Phase Transitions While Degrading Percolation Robustness in Scale-Free Networks"
+  title: "Compounding Vulnerability: Hub Removal Can Trigger Cascade Phase Transitions While Degrading Percolation Robustness in Barabási-Albert Networks"
   authors:
     - family-names: Cachero
       given-names: Federico
   year: 2026
-  # Fill after arXiv submission
-  # journal: "arXiv"
-  # url: "https://arxiv.org/abs/XXXX.XXXXX"
+  journal: "arXiv preprint"
+  url: "https://arxiv.org/abs/2603.04838"
